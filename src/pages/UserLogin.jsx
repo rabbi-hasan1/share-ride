@@ -1,5 +1,7 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../axios/api";
+import { useAuth } from "../hooks/useAuth";
 
 function UserLogin() {
   const {
@@ -8,10 +10,19 @@ function UserLogin() {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
 
-  const handleLogin = (formdata) => {
-    // Replace this with your API call
-    console.log(formdata);
+  const handleLogin = async (formdata) => {
+    try {
+      const response = await api.post("/auth/login", formdata);
+      if (response.status === 200) {
+        setAuth(response.data.user);
+        localStorage.setItem("token", response.data.token);
+        navigate("/home");
+      }
+    } catch (error) {
+      console.log(error?.message);
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import api from "../axios/api";
+import { useAuth } from "../hooks/useAuth";
 function UserSignup() {
   const {
     register,
@@ -8,9 +9,26 @@ function UserSignup() {
     formState: { errors },
     reset,
   } = useForm();
+  const { setAuth } = useAuth();
+  const navigate = useNavigate();
 
-  const handleUserSignUp = (formdata) => {
-    console.log(formdata);
+  const handleUserSignUp = async (formdata) => {
+    const user = {
+      fullname: {
+        firstname: formdata.firstname,
+        lastname: formdata.lastname,
+      },
+      email: formdata.email,
+      password: formdata.password,
+    };
+    try {
+      const response = await api.post("/auth/register", user);
+      setAuth(response.data.user);
+      localStorage.setItem("token", response.data.token);
+      navigate("/login");
+    } catch (error) {
+      console.log(error.message);
+    }
     reset();
   };
   return (
