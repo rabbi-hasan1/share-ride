@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../axios/api";
 import { useAuth } from "../hooks/useAuth";
 function UserSignup() {
+  const [error, setError] = useState("");
   const {
     register,
     handleSubmit,
@@ -27,12 +29,19 @@ function UserSignup() {
       localStorage.setItem("token", response.data.token);
       navigate("/login");
     } catch (error) {
-      console.log(error.message);
+      if (error?.response) {
+        setError(error?.response?.data?.message);
+      } else if (error?.request) {
+        setError("server is not responding");
+      } else {
+        setError("someting went wrong");
+      }
     }
     reset();
   };
   return (
     <div className="min-h-screen flex  py-12 flex-col items-center  justify-between bg-white px-4">
+      {error && <p className="text-red-400">{error}</p>}
       <form
         onSubmit={handleSubmit(handleUserSignUp)}
         className="w-full max-w-md md:border md:border-gray-200 rounded-lg p-7 "

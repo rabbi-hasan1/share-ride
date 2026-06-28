@@ -1,7 +1,12 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../axios/api";
+import { useAuth } from "../hooks/useAuth";
 
 function CaptainLogin() {
+  const { setAuth } = useAuth();
+  const [error, setError] = useState("");
   const {
     register,
     handleSubmit,
@@ -9,13 +14,33 @@ function CaptainLogin() {
   } = useForm();
   const navigate = useNavigate();
 
-  const handleLogin = (formdata) => {
+  const handleLogin = async (formdata) => {
     console.log(formdata);
+    try {
+      const response = await api.post("/captains/login", {
+        email: formdata?.email,
+        password: formdata?.password,
+      });
+      if (response.status === 200) {
+        setAuth(response.data.user);
+        localStorage.setItem("token", response.data.token);
+        navigate("/home");
+      }
+    } catch (error) {
+      if (error?.response) {
+        setError(error?.response?.data?.message);
+      } else if (error?.request) {
+        setError("server is not responding");
+      } else {
+        setError("someting went wrong");
+      }
+    }
   };
 
   return (
     <>
       <div className="min-h-screen flex  py-12 flex-col items-center md:justify-center justify-between bg-white px-4">
+        {error && <p className="text-red-400">{error}</p>}
         <form
           onSubmit={handleSubmit(handleLogin)}
           className="w-full max-w-md md:border md:border-gray-200 rounded-lg p-7 "
@@ -47,6 +72,7 @@ function CaptainLogin() {
             type="password"
             name="password"
             autoComplete="current-password"
+            placeholder="*******"
             {...register("password", {
               required: "Password is must be required",
               minLength: {
