@@ -24,7 +24,7 @@ function CaptainLogin() {
       if (response.status === 200) {
         setAuth(response.data.user);
         localStorage.setItem("token", response.data.token);
-        navigate("/home");
+        navigate("/captain-home");
       }
     } catch (error) {
       if (error?.response) {
